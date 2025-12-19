@@ -1,56 +1,87 @@
+
+* {
+  box-sizing: border-box;
+}
+
 body {
-  font-family: "Segoe UI", Arial, sans-serif;
   margin: 0;
-  min-height: 100vh;
+  font-family: "Segoe UI", Arial, sans-serif;
+  min-height: 100svh;
   background: url("/Frame.png") no-repeat center center;
   background-size: cover;
 }
+
 .main-wrapper {
   display: flex;
   width: 100%;
-  height: 100vh;
+  min-height: 100svh;
 }
+
+
+.left-side,
+.right-side {
+  flex: 1;
+  position: relative;
+}
+
+
 .left-side {
-  width: 50%;
-  background-size: cover;
+  overflow: hidden;
+}
+
+.left-side img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; 
+}
+
+
+.right-side {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 20px;
 }
-.left-side img {
-  max-width: 80%;
-  height: 100vh;
-}
+
+
 .right-form {
-  position: absolute;
-  top: 26%;
-  right: 10%;
   width: 450px;
+  max-width: 100%;
   background: #ffffff;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
   padding: 40px;
+  border-radius: 24px;
   box-shadow: -10px 0 50px rgba(0, 0, 0, 0.1);
-  overflow-y: auto;
-  border-radius: 5%;
+  animation: fadeUp 0.5s ease;
 }
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .right-form h2 {
   text-align: center;
   color: #2563eb;
-  font-size: 22px;
   margin-bottom: 20px;
 }
+
+
 .form-group {
   margin-bottom: 14px;
 }
 
 .form-group label {
-  font-size: 15px;
-  font-weight: 500;
+  font-size: 14px;
   margin-bottom: 6px;
   display: block;
-  color: #374151;
 }
 
 .form-group input,
@@ -59,8 +90,8 @@ body {
   padding: 10px 12px;
   border-radius: 8px;
   border: 1px solid #e5e7eb;
-  font-size: 13px;
 }
+
 
 .upload-box {
   border: 2px dashed #93c5fd;
@@ -80,6 +111,7 @@ body {
   cursor: pointer;
 }
 
+
 .submit-btn {
   margin-top: 18px;
   padding: 12px;
@@ -91,25 +123,14 @@ body {
   font-weight: 600;
   cursor: pointer;
 }
-.submit-btn:hover{
+
+.submit-btn:hover {
   background: #4270d3;
-
 }
 
-/* MOBILE */
-@media (max-width: 900px) {
-  body {
-    flex-direction: column;
-  }
-
-  .left-image {
-    height: 220px;
-  }
-
-  .right-form {
-    width: 100%;
-  }
-}
 .hidden {
   display: none;
 }
+
+
+
