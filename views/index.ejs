@@ -1,184 +1,273 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>PDF Upload</title>
-  <link rel="stylesheet" href="/css/style.css" />
-</head>
-
-<body>
-
-<div class="main-wrapper">
-  <div class="left-side">
-    <img src="/assets/group-1000004488.png" alt="Design Image" />
-  </div>
-  <div class="right-side">
-  <div class="right-form">
-    <h2 class="text-heading">Create a Customized PDF</h2>
-
-    <form action="/upload" method="post" enctype="multipart/form-data">
-
-      <div class="form-group">
-        <label>Name</label>
-        <input
-          type="text"
-          name="textName"
-          placeholder="Enter doctor's name"
-        />
+  <head>
+    <meta charset="UTF-8" />
+    <title>PDF Upload</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <div class="main-wrapper">
+      <div class="left-side">
+        <img src="/assets/group-1000004488.png" alt="Design Image" />
       </div>
+      <div class="right-side">
+        <div class="right-form">
+          <h2 class="text-heading">Create a Customized PDF</h2>
 
-      <div class="form-group">
-        <label>Referral Doctor</label>
-        <input
-          type="text"
-          name="refDoctor"
-          placeholder="Enter referral doctor"
-        />
+          <form action="/upload" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+              <label>Name</label>
+              <input
+                type="text"
+                name="textName"
+                placeholder="Enter doctor's name"
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Referral Doctor</label>
+              <input
+                type="text"
+                name="refDoctor"
+                placeholder="Enter referral doctor"
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Doctor Education</label>
+              <input
+                type="text"
+                name="education"
+                placeholder="Enter doctor's education"
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Serial Number (S/N)</label>
+              <input
+                type="text"
+                name="serialNo"
+                placeholder="Enter serial number"
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Choose Input Option</label>
+              <select id="inputSelector" name="inputType">
+                <option value="">-- Select Option --</option>
+                <option value="logo">Upload Hospital Logo</option>
+                <option value="name">Enter Hospital Name</option>
+              </select>
+            </div>
+
+            <div class="form-group hidden" id="hospitalNameInput">
+              <label>Hospital Name</label>
+              <input
+                type="text"
+                name="HospitalName"
+                placeholder="Enter hospital name"
+              />
+            </div>
+
+            <!-- Hospital Logo -->
+            <div class="upload-box hidden" id="hospitalLogoUpload">
+              <input
+                type="file"
+                id="logoUpload"
+                name="hospitalLogo"
+                accept="image/*"
+                hidden
+              />
+              <button type="button" onclick="logoUpload.click()">
+                Upload Hospital Logo
+              </button>
+
+              <div
+                id="logoPreview"
+                class="hidden"
+                style="margin-top: 10px"
+              ></div>
+            </div>
+
+            <!-- PDF Upload -->
+            <div class="upload-box">
+              <input
+                type="file"
+                id="pdfUpload"
+                name="pdf"
+                accept="application/pdf"
+                hidden
+                required
+              />
+              <button type="button" onclick="pdfUpload.click()">
+                Browse PDF
+              </button>
+
+              <div
+                id="pdfPreview"
+                class="hidden"
+                style="margin-top: 10px"
+              ></div>
+            </div>
+
+            <button type="submit" class="submit-btn">
+              Upload & Process PDF
+            </button>
+          </form>
+        </div>
       </div>
+    </div>
+    <div id="toast" class="toast hidden"></div>
+    <script>
+      function showToast(message, type = "error") {
+        const toast = document.getElementById("toast");
+        toast.textContent = message;
+        toast.className = "toast show " + type;
 
-      <div class="form-group">
-        <label>Doctor Education</label>
-        <input
-          type="text"
-          name="education"
-          placeholder="Enter doctor's education"
-        />
-      </div>
+        setTimeout(() => {
+          toast.className = "toast hidden";
+        }, 3000);
+      }
 
-      <div class="form-group">
-        <label>Serial Number (S/N)</label>
-        <input
-          type="text"
-          name="serialNo"
-          placeholder="Enter serial number"
-        />
-      </div>
+      const form = document.querySelector("form");
+      const selector = document.getElementById("inputSelector");
 
-      <div class="form-group">
-        <label>Choose Input Option</label>
-        <select id="inputSelector" name="inputType">
-          <option value="">-- Select Option --</option>
-          <option value="logo">Upload Hospital Logo</option>
-          <option value="name">Enter Hospital Name</option>
-        </select>
-      </div>
+      const hospitalNameInput = document.getElementById("hospitalNameInput");
+      const hospitalLogoUpload = document.getElementById("hospitalLogoUpload");
 
-      <div class="form-group hidden" id="hospitalNameInput">
-        <label>Hospital Name</label>
-        <input
-          type="text"
-          name="HospitalName"
-          placeholder="Enter hospital name"
-        />
-      </div>
+      const logoInput = document.getElementById("logoUpload");
+      const pdfInput = document.getElementById("pdfUpload");
 
-      <!-- Hospital Logo -->
-      <div class="upload-box hidden" id="hospitalLogoUpload">
-        <input
-          type="file"
-          id="logoUpload"
-          name="hospitalLogo"
-          accept="image/*"
-          hidden
-        />
-        <button type="button" onclick="logoUpload.click()">
-          Upload Hospital Logo
-        </button>
+      const logoPreview = document.getElementById("logoPreview");
+      const pdfPreview = document.getElementById("pdfPreview");
 
-        <div id="logoPreview" class="hidden" style="margin-top:10px;"></div>
-      </div>
+      // Toggle hospital inputs
+      selector.addEventListener("change", function () {
+        hospitalNameInput.classList.add("hidden");
+        hospitalLogoUpload.classList.add("hidden");
 
-      <!-- PDF Upload -->
-      <div class="upload-box">
-        <input
-          type="file"
-          id="pdfUpload"
-          name="pdf"
-          accept="application/pdf"
-          hidden
-          required
-        />
-        <button type="button" onclick="pdfUpload.click()">
-          Browse PDF
-        </button>
+        if (this.value === "name") hospitalNameInput.classList.remove("hidden");
+        if (this.value === "logo")
+          hospitalLogoUpload.classList.remove("hidden");
+      });
 
-        <div id="pdfPreview" class="hidden" style="margin-top:10px;"></div>
-      </div>
+      // Logo validation (PNG only)
+      logoInput.addEventListener("change", function () {
+        const file = this.files[0];
+        logoPreview.innerHTML = "";
+        logoPreview.classList.add("hidden");
 
-      <button type="submit" class="submit-btn">
-        Upload & Process PDF
-      </button>
-    </form>
-  </div>
-  </div>
-</div>
+        if (!file) return;
 
-<script>
-  const selector = document.getElementById("inputSelector");
-  const hospitalNameInput = document.getElementById("hospitalNameInput");
-  const hospitalLogoUpload = document.getElementById("hospitalLogoUpload");
+        if (file.type !== "image/png") {
+          showToast("Only PNG images are allowed for the hospital logo.");
+          this.value = "";
+          return;
+        }
 
-  const logoInput = document.getElementById("logoUpload");
-  const pdfInput = document.getElementById("pdfUpload");
+        const img = document.createElement("img");
+        img.src = URL.createObjectURL(file);
+        img.style.maxWidth = "120px";
+        img.style.borderRadius = "8px";
+        img.onload = () => URL.revokeObjectURL(img.src);
 
-  const logoPreview = document.getElementById("logoPreview");
-  const pdfPreview = document.getElementById("pdfPreview");
+        logoPreview.appendChild(img);
+        logoPreview.classList.remove("hidden");
+      });
 
-  selector.addEventListener("change", function () {
-    hospitalNameInput.classList.add("hidden");
-    hospitalLogoUpload.classList.add("hidden");
+      // PDF preview
+      pdfInput.addEventListener("change", function () {
+        const file = this.files[0];
+        pdfPreview.innerHTML = "";
+        pdfPreview.classList.add("hidden");
 
-    if (this.value === "name") {
-      hospitalNameInput.classList.remove("hidden");
-    }
-    if (this.value === "logo") {
-      hospitalLogoUpload.classList.remove("hidden");
-    }
-  });
+        if (!file) return;
 
-  logoInput.addEventListener("change", function () {
-    const file = this.files[0];
-    logoPreview.innerHTML = "";
-    logoPreview.classList.add("hidden");
+        if (file.type !== "application/pdf") {
+          showToast("Only PDF files are allowed.");
+          this.value = "";
+          return;
+        }
 
-    if (file && file.type.startsWith("image/")) {
-      const img = document.createElement("img");
-      img.src = URL.createObjectURL(file);
-      img.style.maxWidth = "120px";
-      img.style.borderRadius = "8px";
-      img.onload = () => URL.revokeObjectURL(img.src);
+        const container = document.createElement("div");
+        container.style.display = "flex";
+        container.style.alignItems = "center";
+        container.style.gap = "10px";
 
-      logoPreview.appendChild(img);
-      logoPreview.classList.remove("hidden");
-    }
-  });
+        const icon = document.createElement("img");
+        icon.src = "https://cdn-icons-png.flaticon.com/512/337/337946.png";
+        icon.style.width = "40px";
 
-  pdfInput.addEventListener("change", function () {
-    const file = this.files[0];
-    pdfPreview.innerHTML = "";
-    pdfPreview.classList.add("hidden");
+        const name = document.createElement("span");
+        name.textContent = file.name;
 
-    if (file && file.type === "application/pdf") {
-      const container = document.createElement("div");
-      container.style.display = "flex";
-      container.style.alignItems = "center";
-      container.style.gap = "10px";
+        container.appendChild(icon);
+        container.appendChild(name);
 
-      const icon = document.createElement("img");
-      icon.src = "https://cdn-icons-png.flaticon.com/512/337/337946.png";
-      icon.style.width = "40px";
+        pdfPreview.appendChild(container);
+        pdfPreview.classList.remove("hidden");
+      });
 
-      const name = document.createElement("span");
-      name.textContent = file.name;
+      form.addEventListener("submit", function (e) {
+        const name = form.textName.value.trim();
+        const refDoctor = form.refDoctor.value.trim();
+        const education = form.education.value.trim();
+        const serialNo = form.serialNo.value.trim();
+        const inputType = selector.value;
 
-      container.appendChild(icon);
-      container.appendChild(name);
+        if (!name) {
+          e.preventDefault();
+          showToast("Doctor name is required.");
+          return;
+        }
 
-      pdfPreview.appendChild(container);
-      pdfPreview.classList.remove("hidden");
-    }
-  });
-</script>
+        if (!refDoctor) {
+          e.preventDefault();
+          showToast("Referral doctor is required.");
+          return;
+        }
 
-</body>
+        if (!education) {
+          e.preventDefault();
+          showToast("Doctor education is required.");
+          return;
+        }
+
+        if (!serialNo) {
+          e.preventDefault();
+          showToast("Serial number is required.");
+          return;
+        }
+
+        if (!inputType) {
+          e.preventDefault();
+          showToast("Please select hospital input option.");
+          return;
+        }
+
+        if (inputType === "name") {
+          const hospitalName = form.HospitalName.value.trim();
+          if (!hospitalName) {
+            e.preventDefault();
+            showToast("Hospital name is required.");
+            return;
+          }
+        }
+
+        if (inputType === "logo") {
+          if (!logoInput.files.length) {
+            e.preventDefault();
+            showToast("Hospital logo (PNG) is required.");
+            return;
+          }
+        }
+
+        if (!pdfInput.files.length) {
+          e.preventDefault();
+          showToast("PDF file is required.");
+          return;
+        }
+      });
+    </script>
+  </body>
 </html>

@@ -1,4 +1,3 @@
-
 * {
   box-sizing: border-box;
 }
@@ -17,13 +16,11 @@ body {
   min-height: 100svh;
 }
 
-
 .left-side,
 .right-side {
   flex: 1;
   position: relative;
 }
-
 
 .left-side {
   overflow: hidden;
@@ -34,9 +31,8 @@ body {
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover; 
+  object-fit: cover;
 }
-
 
 .right-side {
   display: flex;
@@ -44,7 +40,6 @@ body {
   justify-content: center;
   padding: 20px;
 }
-
 
 .right-form {
   width: 450px;
@@ -73,7 +68,6 @@ body {
   margin-bottom: 20px;
 }
 
-
 .form-group {
   margin-bottom: 14px;
 }
@@ -92,7 +86,6 @@ body {
   border: 1px solid #e5e7eb;
 }
 
-
 .upload-box {
   border: 2px dashed #93c5fd;
   background: #f5f9ff;
@@ -110,7 +103,6 @@ body {
   border-radius: 6px;
   cursor: pointer;
 }
-
 
 .submit-btn {
   margin-top: 18px;
@@ -131,6 +123,35 @@ body {
 .hidden {
   display: none;
 }
+.toast {
+  position: fixed;
+  top: 30px;
+  right: 30px;
+  padding: 14px 22px;
+  background: #333;
+  color: #fff;
+  border-radius: 8px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.3s ease;
+  z-index: 9999;
+}
 
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
 
-
+.toast.error {
+  background-color: #f44336;
+}
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

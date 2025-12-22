@@ -7,12 +7,13 @@ const flash = require("connect-flash");
 const { PDFDocument } = require("pdf-lib");
 
 const app = express();
+
+
 app.use(express.static(path.join(__dirname)));
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
 app.use(express.urlencoded({ extended: true }));
-
 app.use(express.static("uploads"));
 app.use(express.static("assets"));
 
@@ -31,6 +32,17 @@ app.use((req, res, next) => {
   res.locals.error = req.flash("error");
   next();
 });
+
+
+const safeDelete = (filePath) => {
+  if (!filePath) return;
+
+  fs.unlink(filePath, (err) => {
+    if (err && err.code !== "ENOENT") {
+      console.error("Failed to delete:", filePath, err);
+    }
+  });
+};
 
 
 const storage = multer.diskStorage({
@@ -58,27 +70,31 @@ app.post(
     { name: "hospitalLogo", maxCount: 1 },
   ]),
   async (req, res) => {
-
+    let uploadedPdf;
+    let hospitalLogoFile;
+    let outputPath;
     try {
+      if(req.body.textName==""){
+         req.flash("error", "textName  required");
+      }
       if (!req.files || !req.files.pdf) {
         req.flash("error", "Please upload a PDF file");
-        return res.redirect("/");
       }
 
-      const uploadedPdf = req.files.pdf[0];
-      const pdfPath = uploadedPdf.path;
-      const originalFileName = path.parse(uploadedPdf.originalname).name;
-
-      const hospitalLogoFile = req.files.hospitalLogo
+      uploadedPdf = req.files.pdf[0];
+      hospitalLogoFile = req.files.hospitalLogo
         ? req.files.hospitalLogo[0]
         : null;
 
+      const pdfPath = uploadedPdf.path;
+      const originalFileName = path.parse(uploadedPdf.originalname).name;
+
       const existingPdfBytes = fs.readFileSync(pdfPath);
+      const pdfDoc = await PDFDocument.load(existingPdfBytes);
+
       const defaultLogoBytes = fs.readFileSync(
         path.join(__dirname, "assets/default_logo.png")
       );
-
-      const pdfDoc = await PDFDocument.load(existingPdfBytes);
       const defaultLogoImage = await pdfDoc.embedPng(defaultLogoBytes);
 
       let hospitalLogoImage = null;
@@ -86,6 +102,7 @@ app.post(
         const logoBytes = fs.readFileSync(hospitalLogoFile.path);
         hospitalLogoImage = await pdfDoc.embedPng(logoBytes);
       }
+
       const {
         textName,
         HospitalName,
@@ -94,10 +111,12 @@ app.post(
         serialNo,
       } = req.body;
 
+
       const pages = pdfDoc.getPages();
 
       pages.forEach((page, index) => {
         const { width, height } = page.getSize();
+
 
         const leftDims = defaultLogoImage.scaleToFit(100, 100);
         page.drawImage(defaultLogoImage, {
@@ -106,6 +125,7 @@ app.post(
           width: leftDims.width,
           height: leftDims.height,
         });
+
 
         if (hospitalLogoImage) {
           const dims = hospitalLogoImage.scaleToFit(60, 60);
@@ -121,11 +141,11 @@ app.post(
 
           let y = topY - dims.height - 20;
           if (textName) {
-            page.drawText(textName, { x: rightX , y, size: 11 });
+            page.drawText(textName, { x: rightX, y, size: 11 });
             y -= 15;
           }
           if (education) {
-            page.drawText(education, { x: rightX , y, size: 9 });
+            page.drawText(education, { x: rightX, y, size: 9 });
           }
         } else {
           let y = height - 50;
@@ -143,6 +163,7 @@ app.post(
             page.drawText(education, { x, y, size: 9 });
           }
         }
+
 
         if (index === 0) {
           if (refDoctor) {
@@ -170,23 +191,29 @@ app.post(
       });
 
       const modifiedPdf = await pdfDoc.save();
-      const outputFileName = `${originalFileName}_final.pdf`;
-      const outputPath = path.join("uploads", outputFileName);
-
+      outputPath = path.join("uploads", `${originalFileName}_final.pdf`);
       fs.writeFileSync(outputPath, modifiedPdf);
 
-      req.flash("success", "PDF processed successfully!");
-      res.download(outputPath, `${originalFileName}.pdf`);
-    }catch (err) {
-  console.error("error", err);
-  req.flash("error", "Failed to process PDF. Please try again.");
-  return res.redirect("/");
-}
+      res.download(outputPath, `${originalFileName}.pdf`, (err) => {
+        if (err) console.error("Download error:", err);
+        safeDelete(outputPath);                 
+        safeDelete(uploadedPdf.path);          
+        safeDelete(hospitalLogoFile?.path);     
+      });
 
+    } catch (err) {
+      console.error("Processing error:", err);
+
+      safeDelete(outputPath);
+      safeDelete(uploadedPdf?.path);
+      safeDelete(hospitalLogoFile?.path);
+
+      req.flash("error", err || "Something went wrong while processing the PDF");
+      return res.render("/",{errr:err});
+    }
   }
 );
 
-
 app.listen(3000, () => {
-  console.log(" Server running on http://localhost:3000");
+  console.log("Server running on http://localhost:3000");
 });
