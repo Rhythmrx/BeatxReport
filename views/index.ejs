@@ -234,10 +234,17 @@
         }
 
         if (!serialNo) {
+          
+  
           e.preventDefault();
           showToast("Serial number is required.");
           return;
         }
+        if (serialNo.length !== 7) {
+  e.preventDefault();
+  showToast("Serial number must be exactly 7 digits.");
+  return;
+}
 
         if (!inputType) {
           e.preventDefault();
