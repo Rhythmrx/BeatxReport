@@ -215,36 +215,16 @@
         const serialNo = form.serialNo.value.trim();
         const inputType = selector.value;
 
-        if (!name) {
-          e.preventDefault();
-          showToast("Doctor name is required.");
-          return;
-        }
-
-        if (!refDoctor) {
-          e.preventDefault();
-          showToast("Referral doctor is required.");
-          return;
-        }
-
-        if (!education) {
-          e.preventDefault();
-          showToast("Doctor education is required.");
-          return;
-        }
-
         if (!serialNo) {
-          
-  
           e.preventDefault();
           showToast("Serial number is required.");
           return;
         }
         if (serialNo.length !== 7) {
-  e.preventDefault();
-  showToast("Serial number must be exactly 7 digits.");
-  return;
-}
+          e.preventDefault();
+          showToast("Serial number must be exactly 7 digits.");
+          return;
+        }
 
         if (!inputType) {
           e.preventDefault();
