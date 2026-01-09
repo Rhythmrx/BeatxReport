@@ -1,7 +1,6 @@
 * {
   box-sizing: border-box;
 }
-
 body {
   margin: 0;
   font-family: "Segoe UI", Arial, sans-serif;
@@ -9,13 +8,11 @@ body {
   background: url("/Frame.png") no-repeat center center;
   background-size: cover;
 }
-
 .main-wrapper {
   display: flex;
   width: 100%;
   min-height: 100svh;
 }
-
 .left-side,
 .right-side {
   flex: 1;
@@ -212,3 +209,5 @@ body {
     transform: translateX(0);
   }
 }
+
+

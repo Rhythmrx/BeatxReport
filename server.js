@@ -8,7 +8,6 @@ const { PDFDocument } = require("pdf-lib");
 
 const app = express();
 
-
 app.use(express.static(path.join(__dirname)));
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
@@ -33,17 +32,14 @@ app.use((req, res, next) => {
   next();
 });
 
-
 const safeDelete = (filePath) => {
   if (!filePath) return;
-
   fs.unlink(filePath, (err) => {
     if (err && err.code !== "ENOENT") {
       console.error("Failed to delete:", filePath, err);
     }
   });
 };
-
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -57,7 +53,6 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage });
-
 
 app.get("/", (req, res) => {
   res.render("index");
@@ -73,9 +68,10 @@ app.post(
     let uploadedPdf;
     let hospitalLogoFile;
     let outputPath;
+
     try {
-      if(req.body.textName==""){
-         req.flash("error", "textName  required");
+      if (req.body.textName == "") {
+        req.flash("error", "textName required");
       }
       if (!req.files || !req.files.pdf) {
         req.flash("error", "Please upload a PDF file");
@@ -90,7 +86,33 @@ app.post(
       const originalFileName = path.parse(uploadedPdf.originalname).name;
 
       const existingPdfBytes = fs.readFileSync(pdfPath);
-      const pdfDoc = await PDFDocument.load(existingPdfBytes);
+      const originalPdf = await PDFDocument.load(existingPdfBytes);
+
+
+      let removePages = [];
+      if (req.body.page) {
+        removePages = req.body.page
+          .split(",")
+          .map(p => parseInt(p.trim(), 10) - 1)
+          .filter(p => !isNaN(p));
+      }
+
+      const pdfDoc = await PDFDocument.create();
+      const totalPages = originalPdf.getPageCount();
+
+      const pagesToKeep = [];
+      for (let i = 0; i < totalPages; i++) {
+        if (!removePages.includes(i)) {
+          pagesToKeep.push(i);
+        }
+      }
+
+      if (pagesToKeep.length === 0) {
+        throw new Error("All pages removed. At least one page must remain.");
+      }
+
+      const copiedPages = await pdfDoc.copyPages(originalPdf, pagesToKeep);
+      copiedPages.forEach(p => pdfDoc.addPage(p));
 
       const defaultLogoBytes = fs.readFileSync(
         path.join(__dirname, "assets/default_logo.png")
@@ -111,12 +133,10 @@ app.post(
         serialNo,
       } = req.body;
 
-
       const pages = pdfDoc.getPages();
 
       pages.forEach((page, index) => {
         const { width, height } = page.getSize();
-
 
         const leftDims = defaultLogoImage.scaleToFit(100, 100);
         page.drawImage(defaultLogoImage, {
@@ -125,7 +145,6 @@ app.post(
           width: leftDims.width,
           height: leftDims.height,
         });
-
 
         if (hospitalLogoImage) {
           const dims = hospitalLogoImage.scaleToFit(60, 60);
@@ -164,7 +183,6 @@ app.post(
           }
         }
 
-
         if (index === 0) {
           if (refDoctor) {
             page.drawText(`Referral Doctor ${refDoctor}`, {
@@ -196,9 +214,9 @@ app.post(
 
       res.download(outputPath, `${originalFileName}.pdf`, (err) => {
         if (err) console.error("Download error:", err);
-        safeDelete(outputPath);                 
-        safeDelete(uploadedPdf.path);          
-        safeDelete(hospitalLogoFile?.path);     
+        safeDelete(outputPath);
+        safeDelete(uploadedPdf.path);
+        safeDelete(hospitalLogoFile?.path);
       });
 
     } catch (err) {
@@ -208,8 +226,8 @@ app.post(
       safeDelete(uploadedPdf?.path);
       safeDelete(hospitalLogoFile?.path);
 
-      req.flash("error", err || "Something went wrong while processing the PDF");
-      return res.render("/",{errr:err});
+      req.flash("error", err.message || "Something went wrong while processing the PDF");
+      return res.render("index");
     }
   }
 );
