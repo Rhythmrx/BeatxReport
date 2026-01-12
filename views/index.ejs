@@ -3,10 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>PDF Upload</title>
+
+  <!-- External CSS -->
   <link rel="stylesheet" href="/css/style.css" />
-  <style>
-    .hidden { display: none; }
-  </style>
+
+  <!-- Font Awesome for back icon -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  />
 </head>
 
 <body>
@@ -14,32 +19,43 @@
     <div class="left-side">
       <img src="/assets/group-1000004488.png" alt="Design Image" />
     </div>
+
     <div class="right-side">
       <div class="right-form">
+
+        <!-- CARD SELECTION -->
         <div class="card-wrapper" id="cardWrapper">
           <div class="select-card" onclick="openForm('beatly')">
             <img src="/assets/image (3).png" />
-        
           </div>
+
           <div class="select-card" onclick="openForm('rx')">
             <img src="/assets/download (1).svg" />
-          
           </div>
         </div>
-        <div class="form-container hidden" id="mainForm">
-          <form action="/upload" method="post" enctype="multipart/form-data">
-<input type="hidden" name="mode" id="modeInput" />
 
-            <h2 class="text-heading" id="formTitle">Create a Customized PDF</h2>
+        <!-- FORM -->
+        <div class="form-container hidden" id="mainForm">
+
+          <!-- BACK BUTTON -->
+          <div class="back-btn" onclick="goBack()">
+            <i class="fa fa-arrow-left"></i>
+            <span>Back</span>
+          </div>
+
+          <form action="/upload" method="post" enctype="multipart/form-data">
 
             <input type="hidden" name="mode" id="modeInput" />
+
+            <h2 class="text-heading" id="formTitle">
+              Create a Customized PDF
+            </h2>
 
             <div class="form-group">
               <label>Name</label>
               <input type="text" name="textName" placeholder="Enter doctor's name" />
             </div>
 
- 
             <div class="form-group" id="refDoctorGroup">
               <label>Referral Doctor</label>
               <input type="text" name="refDoctor" />
@@ -50,7 +66,6 @@
               <input type="text" name="education" />
             </div>
 
-            <!-- RX ONLY -->
             <div class="form-group" id="serialGroup">
               <label>Serial Number</label>
               <input type="text" name="serialNo" />
@@ -77,13 +92,17 @@
 
             <div class="upload-box hidden" id="hospitalLogoUpload">
               <input type="file" id="logoUpload" name="hospitalLogo" accept="image/png" hidden />
-              <button type="button" onclick="logoUpload.click()">Upload Hospital Logo</button>
+              <button type="button" onclick="logoUpload.click()">
+                Upload Hospital Logo
+              </button>
               <div id="logoPreview"></div>
             </div>
 
             <div class="upload-box">
               <input type="file" id="pdfUpload" name="pdf" accept="application/pdf" hidden />
-              <button type="button" onclick="pdfUpload.click()">Browse PDF</button>
+              <button type="button" onclick="pdfUpload.click()">
+                Browse PDF
+              </button>
               <div id="pdfPreview"></div>
             </div>
 
@@ -97,14 +116,24 @@
     </div>
   </div>
 
+  <!-- TOAST -->
   <div id="toast" class="toast hidden"></div>
 
+  <!-- SCRIPT -->
   <script>
     let selectedMode = "";
 
+    const form = document.querySelector("#mainForm form");
+    const selector = document.getElementById("inputSelector");
+    const hospitalNameInput = document.getElementById("hospitalNameInput");
+    const hospitalLogoUpload = document.getElementById("hospitalLogoUpload");
+    const logoInput = document.getElementById("logoUpload");
+    const pdfInput = document.getElementById("pdfUpload");
+    const logoPreview = document.getElementById("logoPreview");
+    const pdfPreview = document.getElementById("pdfPreview");
+
     function openForm(mode) {
       selectedMode = mode;
-      console.log("modeeee",mode)
       document.getElementById("modeInput").value = mode;
 
       document.getElementById("cardWrapper").style.display = "none";
@@ -125,25 +154,25 @@
       }
     }
 
-    function showToast(message) {
-      const toast = document.getElementById("toast");
-      toast.textContent = message;
-      toast.className = "toast show";
-      setTimeout(() => toast.className = "toast hidden", 3000);
-    }
+    function goBack() {
+      selectedMode = "";
+      document.getElementById("modeInput").value = "";
 
-    const form = document.querySelector("#mainForm form");
-    const selector = document.getElementById("inputSelector");
-    const hospitalNameInput = document.getElementById("hospitalNameInput");
-    const hospitalLogoUpload = document.getElementById("hospitalLogoUpload");
-    const logoInput = document.getElementById("logoUpload");
-    const pdfInput = document.getElementById("pdfUpload");
-    const logoPreview = document.getElementById("logoPreview");
-    const pdfPreview = document.getElementById("pdfPreview");
+      form.reset();
+      logoPreview.innerHTML = "";
+      pdfPreview.innerHTML = "";
+
+      hospitalNameInput.classList.add("hidden");
+      hospitalLogoUpload.classList.add("hidden");
+
+      document.getElementById("mainForm").classList.add("hidden");
+      document.getElementById("cardWrapper").style.display = "flex";
+    }
 
     selector.addEventListener("change", function () {
       hospitalNameInput.classList.add("hidden");
       hospitalLogoUpload.classList.add("hidden");
+
       if (this.value === "name") hospitalNameInput.classList.remove("hidden");
       if (this.value === "logo") hospitalLogoUpload.classList.remove("hidden");
     });
@@ -180,6 +209,13 @@
         showToast("PDF file is required");
       }
     });
+
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.className = "toast show";
+      setTimeout(() => (toast.className = "toast hidden"), 3000);
+    }
   </script>
 </body>
 </html>

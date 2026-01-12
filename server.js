@@ -212,7 +212,7 @@ app.post(
                 height: dims.height,
               });
 
-              let y = topY - 30;
+              let y = topY - 40;
 
               if (textName) {
                 page.drawText(textName, { x: rightX + 70, y, size: 9 });
